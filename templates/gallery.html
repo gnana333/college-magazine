@@ -1,0 +1,95 @@
+{% extends "student_base.html" %}
+
+{% block title %}Gallery - St. Ann's College Magazine{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Gallery</h1>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for image in images %}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div class="relative group cursor-pointer" 
+                 onclick="openLightbox('{{ url_for('get_image', image_id=image.image_id) }}', '{{ image.title }}', '{{ image.description }}')">
+                {% if image.image_id %}
+                <img src="{{ url_for('get_image', image_id=image.image_id) }}" 
+                     alt="{{ image.title }}" 
+                     class="w-full h-48 object-cover">
+                {% else %}
+                <div class="bg-gray-100 h-48 flex items-center justify-center">
+                    <span class="text-gray-400">No image</span>
+                </div>
+                {% endif %}
+                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <span class="text-white text-lg font-medium">View</span>
+                </div>
+            </div>
+            <div class="p-4">
+                <h3 class="font-semibold text-lg mb-1">{{ image.title }}</h3>
+                <p class="text-gray-600 text-sm">{{ image.description }}</p>
+                <p class="text-gray-500 text-xs mt-2">{{ image.date.strftime('%B %d, %Y') }}</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full text-center py-12">
+            <p class="text-gray-500">No images found in the gallery.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Lightbox Modal -->
+<div id="lightbox" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <div class="flex justify-between items-center p-4 border-b">
+            <h3 id="lightbox-title" class="text-xl font-semibold"></h3>
+            <button onclick="closeLightbox()" class="text-gray-500 hover:text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="p-4 overflow-auto max-h-[70vh]">
+            <img id="lightbox-image" src="" alt="" class="w-full h-auto max-h-[60vh] object-contain">
+            <p id="lightbox-description" class="mt-4 text-gray-600"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openLightbox(imageUrl, title, description) {
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const lightboxTitle = document.getElementById('lightbox-title');
+        const lightboxDescription = document.getElementById('lightbox-description');
+        
+        lightboxImage.src = imageUrl;
+        lightboxImage.alt = title;
+        lightboxTitle.textContent = title;
+        lightboxDescription.textContent = description || 'No description available.';
+        
+        lightbox.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeLightbox() {
+        const lightbox = document.getElementById('lightbox');
+        lightbox.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Close lightbox when clicking outside the image
+    document.getElementById('lightbox').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeLightbox();
+        }
+    });
+    
+    // Close lightbox with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeLightbox();
+        }
+    });
+</script>
+{% endblock %}
