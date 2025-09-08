@@ -14,10 +14,23 @@ app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
-# MongoDB configuration with GridFS
+# MongoDB configuration with GridFS and connection pooling
 MONGO_URI = 'mongodb+srv://hello:Gnana123@voting.8vt5bip.mongodb.net/college_magazine?retryWrites=true&w=majority'
-client = MongoClient(MONGO_URI)
-db = client['college_magazine']
+
+# Configure MongoDB client with connection pooling and timeouts
+client = MongoClient(
+    MONGO_URI,
+    maxPoolSize=50,  # Maximum number of connections in the connection pool
+    minPoolSize=10,  # Minimum number of connections in the connection pool
+    maxIdleTimeMS=30000,  # Close idle connections after 30 seconds
+    connectTimeoutMS=10000,  # 10 second connection timeout
+    socketTimeoutMS=30000,  # 30 second socket timeout
+    serverSelectionTimeoutMS=10000,  # 10 second server selection timeout
+    retryWrites=True,
+    w='majority'
+)
+
+db = client.get_database('college_magazine')
 fs = GridFS(db)
 
 # Collections
